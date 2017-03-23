@@ -31,29 +31,43 @@ class Cell:
 class Game:
     def __init__(self):
         self.tables = [Table()]  # type: List[Table]
+        self.win_tables = []
+
+    def tables_resort(self):
+        tables = self.tables[:]
+        self.tables = []
+        for table in tables:
+            if EMPTY_CELL != table.win():
+                self.win_tables.append(table)
+            else:
+                self.tables.append(table)
 
     def step(self, player: int, positions: List[int]):
         new_tables = []
+
         for table in self.tables:
-            if EMPTY_CELL == table.win():
-                for pos in positions:
-                    if table.is_empty(pos):
-                        if not self.is_allowed(pos):
-                            raise ValueError(
-                                "Клетка {} заполнена, ход в неё невозможен".format(
-                                    pos))
-                        _t = copy(table)
-                        _t.add_figure(player, pos)
-                        new_tables.append(_t)
-            else:
-                new_tables.append(table)
+            for pos in positions:
+                if not self.is_allowed(pos):
+                    raise ValueError(
+                        "Клетка {} заполнена, ход в неё невозможен".format(
+                            pos))
+                if table.is_empty(pos):
+                    _t = copy(table)
+                    _t.add_figure(player, pos)
+                    new_tables.append(_t)
 
         if 0 == len(new_tables):
-            raise ValueError("Bad Step!")
+            raise ValueError("Fuck you, bad step")
+
         self.tables = new_tables
 
+        self.tables_resort()
+
+        if 0 == len(self.tables):
+            raise ZeroDivisionError("You WIN!!!!!")
+
     def is_allowed(self, pos) -> bool:
-        """ Нельзя ходить в полностью заполненную клетку """
+        """ Нельзя ходить в полностью заполненную клетку рабочих """
         for table in self.tables:
             if table.is_empty(pos):
                 return True
@@ -67,10 +81,10 @@ class Game:
             for pos, cell in table.cells:
                 field[pos] += cell
 
-        act_tables = sum(1 for table in self.tables if table.win() == EMPTY_CELL)
+        act_tables = len(self.tables)
 
         for cell in field:
-            cell.tables = len(self.tables)
+            cell.tables = act_tables
 
         return field
 
@@ -80,11 +94,13 @@ class Game:
             PLAYER_X: 0,
             EMPTY_CELL: 0,
             PLAYER_O: 0,
-            'tables': len(self.tables)
+            'tables': len(self.tables) + len(self.win_tables)
         }
 
-        for table in self.tables:
+        for table in self.win_tables:
             data[table.win()] += 1
+
+        data[EMPTY_CELL] = len(self.tables)
 
         return data
 

@@ -28,7 +28,15 @@ while True:
             print(e)
 
     print("======== TABLES ========")
-    tables = [str(table) for table in game.tables if EMPTY_CELL == table.win()]
+    tables = [str(table) for table in game.tables]
+
+    for s, e in [(0, 3), (3, 6), (6, 9)]:
+        for table in tables:
+            print("{} ".format(table[s:e]), end='')
+        print()
+    print()
+    print("======== WIN TABLES ========")
+    tables = [str(table) for table in game.win_tables]
 
     for s, e in [(0, 3), (3, 6), (6, 9)]:
         for table in tables:
@@ -48,4 +56,4 @@ while True:
                              game.winners['tables']))
     print("{}: {}/{}".format(EMPTY_CELL, game.winners[EMPTY_CELL],
                              game.winners['tables']))
-    print("========================")
+    print("======================================")
