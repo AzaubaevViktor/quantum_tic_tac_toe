@@ -13,7 +13,7 @@ while True:
         positions = [
             int(x)
             for x in
-            input(">> Positions (, 0-9) [Player {}] >>".format(current_player)).split(",")
+            input(">> Positions (0-9) [Player {}] >>".format(current_player))
             if x.isdigit()
             ]
 
@@ -24,11 +24,11 @@ while True:
         try:
             game.step(current_player, positions)
             break
-        except ValueError as e:
+        except (ValueError, IndexError) as e:
             print(e)
 
     print("======== TABLES ========")
-    tables = [str(table) for table in game.tables]
+    tables = [str(table) for table in game.tables if EMPTY_CELL == table.win()]
 
     for s, e in [(0, 3), (3, 6), (6, 9)]:
         for table in tables:
@@ -45,5 +45,7 @@ while True:
     print("======== WINNERS =======")
     print("{}: {}/{}".format(PLAYER_X, game.winners[PLAYER_X], game.winners['tables']))
     print("{}: {}/{}".format(PLAYER_O, game.winners[PLAYER_O],
+                             game.winners['tables']))
+    print("{}: {}/{}".format(EMPTY_CELL, game.winners[EMPTY_CELL],
                              game.winners['tables']))
     print("========================")

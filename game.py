@@ -35,13 +35,16 @@ class Game:
     def step(self, player: int, positions: List[int]):
         new_tables = []
         for table in self.tables:
-            for pos in positions:
-                if not self.is_allowed(pos):
-                    raise ValueError("Клетка {} заполнена, ход в неё невозможен".format(pos))
-                if table.is_empty(pos):
+            if EMPTY_CELL == table.win():
+                for pos in positions:
+                    if not self.is_allowed(pos):
+                        raise ValueError("Клетка {} заполнена, ход в неё невозможен".format(pos))
+
                     _t = copy(table)
                     _t.add_figure(player, pos)
                     new_tables.append(_t)
+            else:
+                new_tables.append(table)
 
         if 0 == len(new_tables):
             raise ValueError("Bad Step!")
@@ -62,6 +65,8 @@ class Game:
             for pos, cell in table.cells:
                 field[pos] += cell
 
+        act_tables = sum(1 for table in self.tables if table.win() == EMPTY_CELL)
+
         for cell in field:
             cell.tables = len(self.tables)
 
@@ -80,8 +85,6 @@ class Game:
             data[table.win()] += 1
 
         return data
-
-
 
 
 win_tables = [
@@ -116,7 +119,8 @@ class Table:
     def win(self):
         for a, b, c in win_tables:
             if self.data[a] == self.data[b] == self.data[c]\
-                    and self.data[a] is not None:
+                    and self.data[a] is not None\
+                    and self.data[a] != EMPTY_CELL:
                 return self.data[a]
         return EMPTY_CELL
 
