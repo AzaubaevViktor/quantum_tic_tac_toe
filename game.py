@@ -39,10 +39,10 @@ class Game:
                 for pos in positions:
                     if not self.is_allowed(pos):
                         raise ValueError("Клетка {} заполнена, ход в неё невозможен".format(pos))
-
-                    _t = copy(table)
-                    _t.add_figure(player, pos)
-                    new_tables.append(_t)
+                    if table.is_empty(pos):
+                        _t = copy(table)
+                        _t.add_figure(player, pos)
+                        new_tables.append(_t)
             else:
                 new_tables.append(table)
 
