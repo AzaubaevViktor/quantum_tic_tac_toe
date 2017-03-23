@@ -37,9 +37,11 @@ class Game:
         for table in self.tables:
             if EMPTY_CELL == table.win():
                 for pos in positions:
-                    if not self.is_allowed(pos):
-                        raise ValueError("Клетка {} заполнена, ход в неё невозможен".format(pos))
                     if table.is_empty(pos):
+                        if not self.is_allowed(pos):
+                            raise ValueError(
+                                "Клетка {} заполнена, ход в неё невозможен".format(
+                                    pos))
                         _t = copy(table)
                         _t.add_figure(player, pos)
                         new_tables.append(_t)
@@ -104,29 +106,37 @@ win_tables = [
 
 class Table:
     def __init__(self, table: 'Table' = None):
-        self.data = copy(table.data) if table else [EMPTY_CELL for _ in range(9)]
+        self._data = copy(table._data) if table else [EMPTY_CELL for _ in range(9)]
+        self._cache = None
 
     def add_figure(self, figure, pos) -> bool:
         if self.is_empty(pos):
-            self.data[pos] = figure
+            self._data[pos] = figure
+            self._cache = None
             return True
         else:
             return False
 
+    def _calc_empty_cache(self):
+        self._cache = [EMPTY_CELL == cell for cell in self._data]
+
     def is_empty(self, pos):
-        return EMPTY_CELL == self.data[pos]
+        if self._cache is None:
+            self._calc_empty_cache()
+
+        return self._cache[pos]
 
     def win(self):
         for a, b, c in win_tables:
-            if self.data[a] == self.data[b] == self.data[c]\
-                    and self.data[a] is not None\
-                    and self.data[a] != EMPTY_CELL:
-                return self.data[a]
+            if self._data[a] == self._data[b] == self._data[c]\
+                    and self._data[a] is not None\
+                    and self._data[a] != EMPTY_CELL:
+                return self._data[a]
         return EMPTY_CELL
 
     @property
     def cells(self):
-        for i, cell in zip(range(9), self.data):
+        for i, cell in zip(range(9), self._data):
             if cell != EMPTY_CELL:
                 yield i, cell
 
@@ -134,4 +144,4 @@ class Table:
         return Table(self)
 
     def __str__(self):
-        return "".join(self.data)
+        return "".join(self._data)
